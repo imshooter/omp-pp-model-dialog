@@ -35,6 +35,7 @@ public OnPlayerCommandText(playerid, cmdtext[]) {
     return 0;
 }
 ```
+![Skins](https://github.com/user-attachments/assets/ac655772-0aac-4d53-b708-4b5d5d46eef2)
 
 # Menu Items
 ```pwn
@@ -90,3 +91,4 @@ public OnPlayerCommandText(playerid, cmdtext[]) {
     return 0;
 }
 ```
+![Items](https://github.com/user-attachments/assets/4036a789-b86e-46fd-865e-541c0cf57a34)

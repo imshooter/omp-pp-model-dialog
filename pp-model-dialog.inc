@@ -8,7 +8,7 @@ enum {
 
 enum _:E_MODEL_DIALOG_DATA {
     E_MODEL_DIALOG_RESPONSE,
-    E_MODEL_DIALOG_LISTITEM,
+    E_MODEL_DIALOG_MENUITEM,
     E_MODEL_DIALOG_MODEL_ID
 };
 
@@ -61,7 +61,7 @@ static
     gTextDrawData[E_TEXT_DRAW_DATA],
     gPlayerTextDrawData[MAX_PLAYERS][E_PLAYER_TEXT_DRAW_DATA],
     gPlayerMenuData[MAX_PLAYERS][E_PLAYER_MENU_DATA],
-    gTextDrawBoxListItem[MAX_TEXT_DRAWS] = { -1, ... }
+    gTextDrawBoxMenuItem[MAX_TEXT_DRAWS] = { -1, ... }
 ;
 
 forward AddModelDialogMenuItem(List:list, modelid, Float:sizeX = 53.000, Float:sizeY = 53.000, Float:rotationX = 0.000, Float:rotationY = 0.000, Float:rotationZ = 0.000, Float:zoom = 1.000, Float:offsetX = 0.000, Float:offsetY = 0.000);
@@ -140,39 +140,39 @@ static UpdateModelDialogMenuScrollBar(playerid, page, totalItems, totalPages) {
 static ShowModelDialogMenuPage(playerid, page) {
     new
         Iter:iterator = list_iter(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], page * MODEL_DIALOG_PAGE_ITEMS),
-        listItem,
+        menuItem,
         data[E_DIALOG_PREVIEW_DATA]
     ;
 
-    for (; iter_inside(iterator) && listItem != MODEL_DIALOG_PAGE_ITEMS; iter_move_next(iterator), ++listItem) {
+    for (; iter_inside(iterator) && menuItem != MODEL_DIALOG_PAGE_ITEMS; iter_move_next(iterator), ++menuItem) {
         iter_get_arr(iterator, data);
 
-        TextDrawSetPos(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem], 
-            148.000 + listItem % MODEL_DIALOG_COLUMNS * 56.000 + data[E_DIALOG_PREVIEW_OFFSET_X],
-            158.000 + listItem / MODEL_DIALOG_COLUMNS * 66.000 + data[E_DIALOG_PREVIEW_OFFSET_Y]
+        TextDrawSetPos(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem], 
+            148.000 + menuItem % MODEL_DIALOG_COLUMNS * 56.000 + data[E_DIALOG_PREVIEW_OFFSET_X],
+            158.000 + menuItem / MODEL_DIALOG_COLUMNS * 66.000 + data[E_DIALOG_PREVIEW_OFFSET_Y]
         );
-        TextDrawTextSize(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem],
+        TextDrawTextSize(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem],
             data[E_DIALOG_PREVIEW_SIZE_X],
             data[E_DIALOG_PREVIEW_SIZE_Y]
         );
-        TextDrawSetPreviewRot(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem],
+        TextDrawSetPreviewRot(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem],
             data[E_DIALOG_PREVIEW_ROTATION_X],
             data[E_DIALOG_PREVIEW_ROTATION_Y],
             data[E_DIALOG_PREVIEW_ROTATION_Z],
             data[E_DIALOG_PREVIEW_ZOOM]
         );
-        TextDrawSetPreviewModel(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem], data[E_DIALOG_PREVIEW_MODEL_ID]);
-        TextDrawColour(gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][listItem], 0x424242FF);
+        TextDrawSetPreviewModel(gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem], data[E_DIALOG_PREVIEW_MODEL_ID]);
+        TextDrawColour(gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][menuItem], 0x424242FF);
 
-        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][listItem]);
-        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_TOP][listItem]);
-        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem]);
+        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][menuItem]);
+        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_TOP][menuItem]);
+        TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem]);
     }
 
-    for (; listItem != MODEL_DIALOG_PAGE_ITEMS; ++listItem) {
-        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][listItem]);
-        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_TOP][listItem]);
-        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][listItem]);
+    for (; menuItem != MODEL_DIALOG_PAGE_ITEMS; ++menuItem) {
+        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][menuItem]);
+        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_TOP][menuItem]);
+        TextDrawHideForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_MODEL_PREVIEW][menuItem]);
     }
 
     new const
@@ -185,7 +185,7 @@ static ShowModelDialogMenuPage(playerid, page) {
     gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = -1;
 }
 
-static SelectModelDialogMenuItem(playerid, listItem) {
+static SelectModelDialogMenuItem(playerid, menuItem) {
     if (gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] >= 0) {
         new const
             lastItem = gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN]
@@ -195,19 +195,19 @@ static SelectModelDialogMenuItem(playerid, listItem) {
         TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][lastItem]);
     }
 
-    TextDrawColour(gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][listItem], 0xFF0000FF);
-    TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][listItem]);
-    gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = listItem;
+    TextDrawColour(gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][menuItem], 0xFF0000FF);
+    TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BOX_BUTTON][menuItem]);
+    gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = menuItem;
 }
 
-static HandleModelDialogMenuSelection(playerid, response, listItem) {
+static HandleModelDialogMenuSelection(playerid, response, menuItem) {
     new
         data[E_MODEL_DIALOG_DATA]
     ;
 
     data[E_MODEL_DIALOG_RESPONSE] = response;
-    data[E_MODEL_DIALOG_LISTITEM] = listItem;
-    data[E_MODEL_DIALOG_MODEL_ID] = listItem >= 0 ? list_get(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], listItem) : -1;
+    data[E_MODEL_DIALOG_MENUITEM] = menuItem;
+    data[E_MODEL_DIALOG_MODEL_ID] = menuItem >= 0 ? list_get(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], menuItem) : -1;
 
     new const
         Task:t = gPlayerMenuData[playerid][E_PLAYER_MENU_TASK]
@@ -422,7 +422,7 @@ hook OnGameModeInit() {
         TextDrawTextSize(t, 54.000, 64.000);
         TextDrawFont(t, TEXT_DRAW_FONT_SPRITE_DRAW);
         TextDrawSetSelectable(t, true);
-        gTextDrawBoxListItem[t] = i;
+        gTextDrawBoxMenuItem[t] = i;
 
         t = gTextDrawData[E_TEXT_DRAW_BOX_TOP][i] = TextDrawCreate(
             148.000 + i % MODEL_DIALOG_COLUMNS * 56.000,
@@ -456,11 +456,11 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid) {
     if (gPlayerMenuData[playerid][E_PLAYER_MENU_LIST]) {
         if (clickedid != INVALID_TEXT_DRAW) {
             new const
-                listItemClicked = gTextDrawBoxListItem[clickedid]
+                menuItemClicked = gTextDrawBoxMenuItem[clickedid]
             ;
 
-            if (listItemClicked >= 0) {
-                SelectModelDialogMenuItem(playerid, listItemClicked);
+            if (menuItemClicked >= 0) {
+                SelectModelDialogMenuItem(playerid, menuItemClicked);
 
                 return 1;
             }
@@ -483,18 +483,18 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid) {
         }
 
         new const
-            listItemChosen = gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN],
-            listItem = listItemChosen + p * MODEL_DIALOG_PAGE_ITEMS
+            menuItemChosen = gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN],
+            menuItem = menuItemChosen + p * MODEL_DIALOG_PAGE_ITEMS
         ;
 
-        if (clickedid == gTextDrawData[E_TEXT_DRAW_SELECT_BUTTON] && listItemChosen >= 0) {
-            HandleModelDialogMenuSelection(playerid, MODEL_DIALOG_RESPONSE_SELECT, listItem);
+        if (clickedid == gTextDrawData[E_TEXT_DRAW_SELECT_BUTTON] && menuItemChosen >= 0) {
+            HandleModelDialogMenuSelection(playerid, MODEL_DIALOG_RESPONSE_SELECT, menuItem);
 
             return 1;
         }
 
         if (clickedid == INVALID_TEXT_DRAW || clickedid == gTextDrawData[E_TEXT_DRAW_CANCEL_BUTTON]) {
-            HandleModelDialogMenuSelection(playerid, MODEL_DIALOG_RESPONSE_CANCEL, (listItemChosen >= 0) ? listItem : -1);
+            HandleModelDialogMenuSelection(playerid, MODEL_DIALOG_RESPONSE_CANCEL, (menuItemChosen >= 0) ? menuItem : -1);
 
             return 1;
         }

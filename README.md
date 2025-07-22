@@ -91,4 +91,4 @@ public OnPlayerCommandText(playerid, cmdtext[]) {
     return 0;
 }
 ```
-![Items](https://github.com/user-attachments/assets/4036a789-b86e-46fd-865e-541c0cf57a34)
+![Items](https://github.com/user-attachments/assets/34867ae6-0b5a-4eaf-851a-7c54b183fda0)

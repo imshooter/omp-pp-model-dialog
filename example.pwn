@@ -8,7 +8,7 @@
 
 main(){}
 
-void:ShowSkinsModelDialog(playerid) {
+void:ShowSkinsModelDialogAsync(playerid) {
     yield 1;
 
     new
@@ -28,11 +28,8 @@ void:ShowSkinsModelDialog(playerid) {
 }
 
 void:ShowItemsModelDialog(playerid) {
-    yield 1;
-
-    new
-        List:list = list_new(),
-        response[E_MODEL_DIALOG_DATA]
+    new const
+        List:list = list_new()
     ;
 
     new const
@@ -40,7 +37,7 @@ void:ShowItemsModelDialog(playerid) {
     ;
 
     new const Float:arr[][] = {
-        {53.0, 53.0, 000.0, 00.0, 000.0, 1.0, -0.5, 0.0},
+        {53.0, 53.0, -20.0, 00.0, -45.0, 1.0, 01.0, 0.0},
         {53.0, 53.0, -20.0, 00.0, 045.0, 1.0, 00.0, 0.0},
         {53.0, 53.0, -20.0, 00.0, 045.0, 1.0, 00.0, 0.0},
         {53.0, 53.0, -20.0, 00.0, 045.0, 1.0, 00.0, 0.0},
@@ -64,14 +61,16 @@ void:ShowItemsModelDialog(playerid) {
         );
     }
 
-    await_arr(response) ShowModelDialogMenuAsync(playerid, list, "ITEMS", "SELECT", "CANCEL");
+    ShowModelDialogMenu(playerid, list, "ITEMS", "SELECT", "CANCEL");
+}
 
-    // ...
+public void:OnModelDialogResponse(playerid, response, menuItem, modelid) {
+    SendClientMessage(playerid, -1, "Non-async item selected (response: %i, menuItem: %i, model: %i)", response, menuItem, modelid);
 }
 
 public OnPlayerCommandText(playerid, cmdtext[]) {
     if (strequal(cmdtext, "/skins")) {
-        ShowSkinsModelDialog(playerid);
+        ShowSkinsModelDialogAsync(playerid);
 
         return 1;
     }

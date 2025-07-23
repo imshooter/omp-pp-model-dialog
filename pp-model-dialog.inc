@@ -215,25 +215,27 @@ static void:HandleModelDialogMenuSelection(playerid, response, menuItem) {
         modelid = (menuItem >= 0) ? list_get(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], menuItem, E_DIALOG_PREVIEW_MODEL_ID) : -1
     ;
 
-    HideModelDialogMenu(playerid);
+    if (gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] != INVALID_TASK) {
+        new
+            data[E_MODEL_DIALOG_DATA]
+        ;
 
-    if (gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] == INVALID_TASK) {
+        data[E_MODEL_DIALOG_RESPONSE] = response;
+        data[E_MODEL_DIALOG_MENUITEM] = menuItem;
+        data[E_MODEL_DIALOG_MODEL_ID] = modelid;
+
+        HideModelDialogMenu(playerid);
+
+        new const
+            Task:t = gPlayerMenuData[playerid][E_PLAYER_MENU_TASK]
+        ;
+
+        gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] = INVALID_TASK;
+        task_set_result_arr(t, data);
+    } else {
         CallLocalFunction("OnModelDialogResponse", "iiii", playerid, response, menuItem, modelid);
-        
-        return;
+        HideModelDialogMenu(playerid);
     }
-
-    new
-        Task:t = gPlayerMenuData[playerid][E_PLAYER_MENU_TASK],
-        data[E_MODEL_DIALOG_DATA]
-    ;
-
-    data[E_MODEL_DIALOG_RESPONSE] = response;
-    data[E_MODEL_DIALOG_MENUITEM] = menuItem;
-    data[E_MODEL_DIALOG_MODEL_ID] = modelid;
-
-    gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] = INVALID_TASK;
-    task_set_result_arr(t, data);
 }
 
 static void:ResetModelDialogMenuData(playerid) {

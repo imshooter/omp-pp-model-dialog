@@ -64,16 +64,26 @@ static
     gTextDrawBoxMenuItem[MAX_TEXT_DRAWS] = { -1, ... }
 ;
 
-forward AddModelDialogMenuItem(List:list, modelid, Float:sizeX = 53.000, Float:sizeY = 53.000, Float:rotationX = 0.000, Float:rotationY = 0.000, Float:rotationZ = 0.000, Float:zoom = 1.000, Float:offsetX = 0.000, Float:offsetY = 0.000);
+/**
+ * # Functions
+ */
+
+forward void:AddModelDialogMenuItem(List:list, modelid, Float:sizeX = 53.000, Float:sizeY = 53.000, Float:rotationX = 0.000, Float:rotationY = 0.000, Float:rotationZ = 0.000, Float:zoom = 1.000, Float:offsetX = 0.000, Float:offsetY = 0.000);
 forward bool:ShowModelDialogMenu(playerid, List:list, const caption[], const button1[], const button2[], start = 0);
 forward Task:ShowModelDialogMenuAsync(playerid, List:list, const caption[], const button1[], const button2[], start = 0);
 forward bool:HideModelDialogMenu(playerid);
 
 /**
+ * # Events
+ */
+
+forward OnModelDialogResponse(playerid, response, menuItem, modelid);
+
+/**
  * # Internal
  */
 
-static ShowModelDialogMenuTextDraws(playerid, const caption[], const button1[], const button2[]) {
+static void:ShowModelDialogMenuTextDraws(playerid, const caption[], const button1[], const button2[]) {
     for (new i; i != 9; ++i) {
         TextDrawShowForPlayer(playerid, gTextDrawData[E_TEXT_DRAW_BACKGROUND][i]);
     }
@@ -125,7 +135,7 @@ static ShowModelDialogMenuTextDraws(playerid, const caption[], const button1[], 
     PlayerTextDrawShow(playerid, pt);
 }
 
-static UpdateModelDialogMenuScrollBar(playerid, page, totalItems, totalPages) {
+static void:UpdateModelDialogMenuScrollBar(playerid, page, totalItems, totalPages) {
     new const
         Float:h = 112.000 * (float(MODEL_DIALOG_PAGE_ITEMS) / float(totalItems)),
         Float:y = 161.500 + (112.000 - h) * (float(page) / float(totalPages - 1))
@@ -137,7 +147,7 @@ static UpdateModelDialogMenuScrollBar(playerid, page, totalItems, totalPages) {
     PlayerTextDrawShow(playerid, gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_SCROLL_BAR]);
 }
 
-static ShowModelDialogMenuPage(playerid, page) {
+static void:ShowModelDialogMenuPage(playerid, page) {
     new
         Iter:iterator = list_iter(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], page * MODEL_DIALOG_PAGE_ITEMS),
         menuItem,
@@ -185,7 +195,7 @@ static ShowModelDialogMenuPage(playerid, page) {
     gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = -1;
 }
 
-static SelectModelDialogMenuItem(playerid, menuItem) {
+static void:SelectModelDialogMenuItem(playerid, menuItem) {
     if (gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] >= 0) {
         new const
             lastItem = gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN]
@@ -200,26 +210,33 @@ static SelectModelDialogMenuItem(playerid, menuItem) {
     gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = menuItem;
 }
 
-static HandleModelDialogMenuSelection(playerid, response, menuItem) {
+static void:HandleModelDialogMenuSelection(playerid, response, menuItem) {
+    new const
+        modelid = (menuItem >= 0) ? list_get(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], menuItem, E_DIALOG_PREVIEW_MODEL_ID) : -1
+    ;
+
+    HideModelDialogMenu(playerid);
+
+    if (gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] == INVALID_TASK) {
+        CallLocalFunction("OnModelDialogResponse", "iiii", playerid, response, menuItem, modelid);
+        
+        return;
+    }
+
     new
+        Task:t = gPlayerMenuData[playerid][E_PLAYER_MENU_TASK],
         data[E_MODEL_DIALOG_DATA]
     ;
 
     data[E_MODEL_DIALOG_RESPONSE] = response;
     data[E_MODEL_DIALOG_MENUITEM] = menuItem;
-    data[E_MODEL_DIALOG_MODEL_ID] = menuItem >= 0 ? list_get(gPlayerMenuData[playerid][E_PLAYER_MENU_LIST], menuItem) : -1;
-
-    new const
-        Task:t = gPlayerMenuData[playerid][E_PLAYER_MENU_TASK]
-    ;
-
-    HideModelDialogMenu(playerid);
+    data[E_MODEL_DIALOG_MODEL_ID] = modelid;
 
     gPlayerMenuData[playerid][E_PLAYER_MENU_TASK] = INVALID_TASK;
     task_set_result_arr(t, data);
 }
 
-static ResetModelDialogMenuData(playerid) {
+static void:ResetModelDialogMenuData(playerid) {
     gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_SCROLL_BAR] = INVALID_PLAYER_TEXT_DRAW;
     gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_CAPTION] = INVALID_PLAYER_TEXT_DRAW;
     gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_PAGE] = INVALID_PLAYER_TEXT_DRAW;
@@ -236,7 +253,7 @@ static ResetModelDialogMenuData(playerid) {
     gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = -1;
 }
 
-static ResetModelDialogMenuDataAndTask(playerid) {
+static void:ResetModelDialogMenuDataAndTask(playerid) {
     if (gPlayerMenuData[playerid][E_PLAYER_MENU_TASK]) {
         task_delete(gPlayerMenuData[playerid][E_PLAYER_MENU_TASK]);
     }
@@ -249,7 +266,7 @@ static ResetModelDialogMenuDataAndTask(playerid) {
  * # External
  */
 
-stock AddModelDialogMenuItem(List:list, modelid, Float:sizeX = 53.000, Float:sizeY = 53.000, Float:rotationX = 0.000, Float:rotationY = 0.000, Float:rotationZ = 0.000, Float:zoom = 1.000, Float:offsetX = 0.000, Float:offsetY = 0.000) {
+stock void:AddModelDialogMenuItem(List:list, modelid, Float:sizeX = 53.000, Float:sizeY = 53.000, Float:rotationX = 0.000, Float:rotationY = 0.000, Float:rotationZ = 0.000, Float:zoom = 1.000, Float:offsetX = 0.000, Float:offsetY = 0.000) {
     new
         data[E_DIALOG_PREVIEW_DATA]
     ;
@@ -273,17 +290,18 @@ stock bool:ShowModelDialogMenu(playerid, List:list, const caption[], const butto
     }
 
     if (gPlayerMenuData[playerid][E_PLAYER_MENU_LIST]) {
-        return false;
+        PlayerTextDrawSetString(playerid, gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_CAPTION], caption);
+        PlayerTextDrawSetString(playerid, gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_FIRST_BUTTON], button1);
+        PlayerTextDrawSetString(playerid, gPlayerTextDrawData[playerid][E_PLAYER_TEXT_DRAW_SECOND_BUTTON], button2);
+    } else {
+        ShowModelDialogMenuTextDraws(playerid, caption, button1, button2);
+        SelectTextDraw(playerid, 0xFF0000FF);
     }
 
     gPlayerMenuData[playerid][E_PLAYER_MENU_LIST] = list;
     gPlayerMenuData[playerid][E_PLAYER_MENU_SIZE] = list_size(list);
-    gPlayerMenuData[playerid][E_PLAYER_MENU_ITEM_CHOSEN] = -1;
-
-    ShowModelDialogMenuTextDraws(playerid, caption, button1, button2);
     ShowModelDialogMenuPage(playerid, start);
-    SelectTextDraw(playerid, 0xFF0000FF);
-
+    
     return true;
 }
 

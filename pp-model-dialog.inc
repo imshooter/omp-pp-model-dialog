@@ -1,3 +1,8 @@
+#if defined _INC_PP_MODEL_DIALOG
+    #endinput
+#endif
+#define _INC_PP_MODEL_DIALOG
+
 #include <PawnPlus>
 #include <YSI_Coding\y_hooks>
 
